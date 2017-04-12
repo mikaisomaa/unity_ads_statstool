@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
@@ -11,43 +12,43 @@ public class csvLoaderScript : MonoBehaviour {
 
 	public GameObject loadingCursor;
 
-    public LineRenderer line1;
-    public LineRenderer line2;
+	public LineRenderer line1;
+	public LineRenderer line2;
 
 	// A single point of data on the graph
-    public struct dataSet
-    {
-        public string timeStamp;
-        public int adRequests;
+	public struct dataSet
+	{
+		public string timeStamp;
+		public int adRequests;
 		public int available;
-        public int started;
-        public int views;
-        public float revenue;
+		public int started;
+		public int views;
+		public float revenue;
 		public string name;
-    };
+	};
 
 	// Column numbers for each type of data
-    public int f_timeStamp;
-    public int f_adRequests = -1;
-    public int f_available = -1;
-    public int f_started = -1;
-    public int f_views = -1;
-    public int f_revenue;
-    public int f_gameId;
+	public int f_timeStamp;
+	public int f_adRequests = -1;
+	public int f_available = -1;
+	public int f_started = -1;
+	public int f_views = -1;
+	public int f_revenue;
+	public int f_gameId;
 	public int f_name;
 
-    public GameObject plotPrefab;
+	public GameObject plotPrefab;
 
 	public InputField gameIDs;
 	public InputField apiKey;
 
-    // sort all data sets based on game ID here
-    public Dictionary<int, List<dataSet>> allStats;
+	// sort all data sets based on game ID here
+	public Dictionary<int, List<dataSet>> allStats;
 
-    public List<int> allItems;
+	public List<int> allItems;
 
-    public Transform peakRevenueTransform;
-    public Text peakRevenueText;
+	public Transform peakRevenueTransform;
+	public Text peakRevenueText;
 	public Transform bigLineNumberTransform;
 	public Text bigAmountText;
 
@@ -105,66 +106,67 @@ public class csvLoaderScript : MonoBehaviour {
 	int firstHorizontalLine = 0;
 
 	Vector3 touchStart;
+	DateTime touchStartTime;
 
-    // Sorts based on timestamp
-    // STACK ITEMS BASED ON TIMESTAMP
-    // 1) check if timestamp = same, if so, combine to single data point
-    // 2) if not same, add new data point
-    public void addToAllStats(int gameId, dataSet newStatLine){
-        dataSet newDataset = new dataSet()
-        {
-            timeStamp = newStatLine.timeStamp,
-            adRequests = newStatLine.adRequests,
-            available = newStatLine.available,
-            started = newStatLine.started,
-            views = newStatLine.views,
-            revenue = newStatLine.revenue
-        };
+	// Sorts based on timestamp
+	// STACK ITEMS BASED ON TIMESTAMP
+	// 1) check if timestamp = same, if so, combine to single data point
+	// 2) if not same, add new data point
+	public void addToAllStats(int gameId, dataSet newStatLine){
+		dataSet newDataset = new dataSet()
+		{
+			timeStamp = newStatLine.timeStamp,
+			adRequests = newStatLine.adRequests,
+			available = newStatLine.available,
+			started = newStatLine.started,
+			views = newStatLine.views,
+			revenue = newStatLine.revenue
+		};
 
 		if (!gameIdToName.ContainsKey(gameId)) {
 			gameIdToName.Add (gameId, newStatLine.name);
 		}
 
-        if (allStats.ContainsKey(gameId))
-        {
-            List<dataSet> addToStatLine = allStats[gameId];
-            int statLines = addToStatLine.Count;
-            if (addToStatLine[statLines - 1].timeStamp == newStatLine.timeStamp)
-            {
-                //dataSet newDataset = new dataSet();
-                newDataset.timeStamp = newStatLine.timeStamp;
+		if (allStats.ContainsKey(gameId))
+		{
+			List<dataSet> addToStatLine = allStats[gameId];
+			int statLines = addToStatLine.Count;
+			if (addToStatLine[statLines - 1].timeStamp == newStatLine.timeStamp)
+			{
+				//dataSet newDataset = new dataSet();
+				newDataset.timeStamp = newStatLine.timeStamp;
 				if (f_adRequests != -1)
-                newDataset.adRequests = addToStatLine[statLines - 1].adRequests + newStatLine.adRequests;
+					newDataset.adRequests = addToStatLine[statLines - 1].adRequests + newStatLine.adRequests;
 				if (f_available != -1)
-				newDataset.available = addToStatLine[statLines - 1].available + newStatLine.available;
+					newDataset.available = addToStatLine[statLines - 1].available + newStatLine.available;
 				if (f_started != -1)
-				newDataset.started = addToStatLine[statLines - 1].started + newStatLine.started;
+					newDataset.started = addToStatLine[statLines - 1].started + newStatLine.started;
 				if (f_views != -1)
-				newDataset.views = addToStatLine[statLines - 1].views + newStatLine.views;
-                newDataset.revenue = addToStatLine[statLines - 1].revenue + newStatLine.revenue;
-                allStats[gameId][statLines - 1] = newDataset;
-            }
-            else
-            {
-                allStats[gameId].Add(new dataSet()
-                {
-                    timeStamp = newStatLine.timeStamp,
-                    adRequests = newStatLine.adRequests,
-                    available = newStatLine.available,
-                    started = newStatLine.started,
-                    views = newStatLine.views,
-                    revenue = newStatLine.revenue
-                });
+					newDataset.views = addToStatLine[statLines - 1].views + newStatLine.views;
+				newDataset.revenue = addToStatLine[statLines - 1].revenue + newStatLine.revenue;
+				allStats[gameId][statLines - 1] = newDataset;
+			}
+			else
+			{
+				allStats[gameId].Add(new dataSet()
+					{
+						timeStamp = newStatLine.timeStamp,
+						adRequests = newStatLine.adRequests,
+						available = newStatLine.available,
+						started = newStatLine.started,
+						views = newStatLine.views,
+						revenue = newStatLine.revenue
+					});
 
-            }
-        }
-        else
-        {
-            List<dataSet> newDataSetList = new List<dataSet>();
-            newDataSetList.Add(newDataset);
-            allStats.Add(gameId, newDataSetList);
-        }
-    }
+			}
+		}
+		else
+		{
+			List<dataSet> newDataSetList = new List<dataSet>();
+			newDataSetList.Add(newDataset);
+			allStats.Add(gameId, newDataSetList);
+		}
+	}
 
 	void Start () {
 		thinLineRenderers = new LineRenderer [thinLines.Length];
@@ -181,10 +183,10 @@ public class csvLoaderScript : MonoBehaviour {
 		}
 
 		gameIdToName = new Dictionary<int,string> ();
-        allStats = new Dictionary<int, List<dataSet>>();
-        allItems = new List<int>();
+		allStats = new Dictionary<int, List<dataSet>>();
+		allItems = new List<int>();
 		howManyAPIKeys = PlayerPrefs.GetInt ("howmanyapikeys");
-        //StartCoroutine(getCSV());
+		//StartCoroutine(getCSV());
 	}
 
 	public void saveApiKey()
@@ -198,10 +200,10 @@ public class csvLoaderScript : MonoBehaviour {
 
 	// goes through a single line from the csv
 	// string array contains comma separated values
-    public dataSet parseCsvLine(string[] csvline)
-    {
-        dataSet newDataset = new dataSet();
-        //newDataset.adRequests = int.TryParse( csvline[f_adRequests]);
+	public dataSet parseCsvLine(string[] csvline)
+	{
+		dataSet newDataset = new dataSet();
+		//newDataset.adRequests = int.TryParse( csvline[f_adRequests]);
 		if (f_adRequests == -1) {
 			newDataset.adRequests = -1;
 		} else {
@@ -222,7 +224,7 @@ public class csvLoaderScript : MonoBehaviour {
 		} else {
 			int.TryParse (csvline [f_started], out newDataset.started);
 		}
-        
+
 		newDataset.timeStamp = csvline[f_timeStamp];
 
 		if (f_views == -1) {
@@ -231,46 +233,46 @@ public class csvLoaderScript : MonoBehaviour {
 			int.TryParse (csvline [f_views], out newDataset.views);
 		}
 
-        return newDataset;
-    }
+		return newDataset;
+	}
 
 
 	// This function marks what each column in the csv stands for
-    public void findHeaderColumns(string header)
-    {
-        string[] headers = header.Split(","[0]);
-        for (int i = 0; i < headers.Length; i++)
-        {
-            if (headers[i] == "Source game id")
-            {
-                f_gameId = i;
-            }
-            if (headers[i] == "adrequests")
-            {
-                f_adRequests = i;
-            }
-            if (headers[i] == "available")
-            {
-                f_available = i;
-            }
-            if (headers[i] == "started")
-            {
-                f_started = i;
-            }
-            if (headers[i] == "views")
-            {
-                f_views = i;
-            }
-            if (headers[i] == "revenue")
-            {
-                f_revenue = i;
-            }
+	public void findHeaderColumns(string header)
+	{
+		string[] headers = header.Split(","[0]);
+		for (int i = 0; i < headers.Length; i++)
+		{
+			if (headers[i] == "Source game id")
+			{
+				f_gameId = i;
+			}
+			if (headers[i] == "adrequests")
+			{
+				f_adRequests = i;
+			}
+			if (headers[i] == "available")
+			{
+				f_available = i;
+			}
+			if (headers[i] == "started")
+			{
+				f_started = i;
+			}
+			if (headers[i] == "views")
+			{
+				f_views = i;
+			}
+			if (headers[i] == "revenue")
+			{
+				f_revenue = i;
+			}
 			if (headers [i] == "Source game name") {
 				f_name = i;
 			}
-            //if (headers[i] == "Date"){ }
-        }
-    }
+			//if (headers[i] == "Date"){ }
+		}
+	}
 
 	public void getCSVFrom(string csvUrl) 
 	{
@@ -326,20 +328,28 @@ public class csvLoaderScript : MonoBehaviour {
 		}
 		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Ended)
 		{
-			Vector3 touchEnd = Input.GetTouch (0).position;
-			Vector3 delta = touchEnd - touchStart;
-			SwipeNow (delta);
+			TimeSpan timeDifference = DateTime.Now - touchStartTime;
+			if (timeDifference.TotalSeconds < 0.5f) {
+				Vector3 touchEnd = Input.GetTouch (0).position;
+				Vector3 delta = touchEnd - touchStart;
+				SwipeNow (delta);
+			}
 		}
 
 		if (Input.GetMouseButtonDown (0))
 		{
 			touchStart = Input.mousePosition;
+			touchStartTime = DateTime.Now;
 		}
 		if (Input.GetMouseButtonUp (0))
 		{
-			Vector3 touchEnd = Input.mousePosition;
-			Vector3 delta = touchEnd - touchStart;
-			SwipeNow (delta);
+			TimeSpan timeDifference = DateTime.Now - touchStartTime;
+			if (timeDifference.TotalSeconds < 0.5f)
+			{
+				Vector3 touchEnd = Input.mousePosition;
+				Vector3 delta = touchEnd - touchStart;
+				SwipeNow (delta);
+			}
 		}
 
 		// check if the mouse cursor / finger has been is on a specific data column
@@ -485,7 +495,7 @@ public class csvLoaderScript : MonoBehaviour {
 
 	// Reads the CSV from URL, marks what each column means and stores the data, then draws the lines
 	IEnumerator getCSV(string csvUrl = "")
-    {
+	{
 		//WWW www = new WWW(csvUrl);
 		UnityWebRequest www = UnityWebRequest.Get(csvUrl);
 
@@ -494,37 +504,37 @@ public class csvLoaderScript : MonoBehaviour {
 		loadingCursor.SetActive (false);
 		theresStats = true;
 		string rawCsv = www.downloadHandler.text;
-        string[] splitToLines = rawCsv.Split("\n"[0]);
-        Debug.Log("Lines: " + splitToLines.Length.ToString());
-        bool firstLine = true;
-        foreach (string line in splitToLines)
-        {
-            if (firstLine)
-            {
-                firstLine = false;
-                // Add column header data
-                // Date,Source game id,adrequests,available,started,views,revenue
-                findHeaderColumns(line);
-            }
-            else
-            {
-                // PARSE THE CSV on each line and add it
-                string[] splitLine = line.Split(","[0]);
-                addToAllStats(int.Parse(splitLine[f_gameId]), parseCsvLine(splitLine));
+		string[] splitToLines = rawCsv.Split("\n"[0]);
+		Debug.Log("Lines: " + splitToLines.Length.ToString());
+		bool firstLine = true;
+		foreach (string line in splitToLines)
+		{
+			if (firstLine)
+			{
+				firstLine = false;
+				// Add column header data
+				// Date,Source game id,adrequests,available,started,views,revenue
+				findHeaderColumns(line);
+			}
+			else
+			{
+				// PARSE THE CSV on each line and add it
+				string[] splitLine = line.Split(","[0]);
+				addToAllStats(int.Parse(splitLine[f_gameId]), parseCsvLine(splitLine));
 
-            }
-        }
-        Debug.Log("Done!");
+			}
+		}
+		Debug.Log("Done!");
 
-        Debug.Log("ALL GAME IDS: " + allStats.Count.ToString());
+		Debug.Log("ALL GAME IDS: " + allStats.Count.ToString());
 		theGameIDs = new List<int> ();
-        foreach (KeyValuePair<int, List<dataSet>> game in allStats)
-        {
+		foreach (KeyValuePair<int, List<dataSet>> game in allStats)
+		{
 			theGameIDs.Add (game.Key);
-            Debug.Log("GAME ID: " + game.Key.ToString() + " has " + game.Value.Count.ToString() + " lines.");
-        }
+			Debug.Log("GAME ID: " + game.Key.ToString() + " has " + game.Value.Count.ToString() + " lines.");
+		}
 		drawLines();
-    }
+	}
 
 	int findNextRoundNumberDown(float numberToCheck) 
 	{
@@ -540,7 +550,7 @@ public class csvLoaderScript : MonoBehaviour {
 	}
 
 	public void drawLines()
-    {
+	{
 		if (allStats == null || allStats.Count == 0) {
 			return;
 		}
@@ -548,20 +558,20 @@ public class csvLoaderScript : MonoBehaviour {
 
 		foreach (LineRenderer thisLine in lines)
 			thisLine.enabled = false;
-		
+
 		currentLine = 0;
 		if (!theresStats)
 			return;
 		for (int i = 0; i < points.Count; i++) {
 			points [i].gameObject.SetActive (false);
 		}
-        int maxRevenuePoint = 0;
+		int maxRevenuePoint = 0;
 		currentPoint = 0;
 		if (currentGameNumber >= allStats.Count || currentGameNumber < 0) {
 			currentGameNumber = 0;
 		}
 		List<dataSet> game = allStats [theGameIDs[currentGameNumber]];
-        
+
 		if (!gameIdToName.ContainsKey (theGameIDs [currentGameNumber])) {
 			gameIdToName.Add(theGameIDs[currentGameNumber],game[0].name);
 
@@ -569,30 +579,30 @@ public class csvLoaderScript : MonoBehaviour {
 		gameName.text = gameIdToName [theGameIDs [currentGameNumber]] + " ID: " + theGameIDs[currentGameNumber].ToString();
 
 
-        float maxRevenue = 0.0001f;
-        float[] revenues = new float[game.Count];
-        for (int i = 0; i < game.Count; i++)
-        {
-            float newRevenue = game[i].revenue;
-            revenues[i] = newRevenue;
-            if (newRevenue > maxRevenue)
-            {
-                maxRevenue = newRevenue;
-                maxRevenuePoint = i;
-            }
-        }
-        line1.SetVertexCount(game.Count);
-        line2.SetVertexCount(game.Count);
+		float maxRevenue = 0.0001f;
+		float[] revenues = new float[game.Count];
+		for (int i = 0; i < game.Count; i++)
+		{
+			float newRevenue = game[i].revenue;
+			revenues[i] = newRevenue;
+			if (newRevenue > maxRevenue)
+			{
+				maxRevenue = newRevenue;
+				maxRevenuePoint = i;
+			}
+		}
+		line1.SetVertexCount(game.Count);
+		line2.SetVertexCount(game.Count);
 		float xSeparation = Mathf.Abs (findCornerPoints.current.RD.position.x - findCornerPoints.current.LD.position.x) / game.Count;
 		float ySize = Mathf.Abs (findCornerPoints.current.RD.position.y - findCornerPoints.current.RU.position.y);
-        for (int i = 0; i < game.Count; i++)
-        {
+		for (int i = 0; i < game.Count; i++)
+		{
 			float revenue = game[i].revenue;
 			//Debug.Log ("REVENUE: " + revenue);
 
 			Vector3 newPosition = findCornerPoints.current.LD.position + new Vector3(i * xSeparation, (revenue / maxRevenue) * ySize, 0f);
-            line1.SetPosition(i, newPosition );
-            line2.SetPosition(i, newPosition );
+			line1.SetPosition(i, newPosition );
+			line2.SetPosition(i, newPosition );
 			lines [currentLine].enabled = true;
 			lines[currentLine].SetPosition(0, new Vector3(newPosition.x, findCornerPoints.current.LD.position.y,newPosition.z));
 			lines[currentLine].SetPosition(1, new Vector3(newPosition.x, findCornerPoints.current.LU.position.y,newPosition.z));
@@ -609,12 +619,12 @@ public class csvLoaderScript : MonoBehaviour {
 				points [currentPoint].gameObject.SetActive (true);
 				currentPoint++;
 			}
-            if (i == maxRevenuePoint)
-            {
-                peakRevenueTransform.position = newPosition;
-                peakRevenueText.text = "peak revenue: " + maxRevenue.ToString("0.00") + "$ at " + game[i].timeStamp.Substring(1, game[i].timeStamp.Length - 2);
-            }
-        }
+			if (i == maxRevenuePoint)
+			{
+				peakRevenueTransform.position = newPosition;
+				peakRevenueText.text = "peak revenue: " + maxRevenue.ToString("0.00") + "$ at " + game[i].timeStamp.Substring(1, game[i].timeStamp.Length - 2);
+			}
+		}
 
 		firstHorizontalLine = currentLine;
 		int highestRoundNumber = findNextRoundNumberDown (maxRevenue);
@@ -647,7 +657,7 @@ public class csvLoaderScript : MonoBehaviour {
 				lines [currentLine+1].endWidth = 0.6f;
 				bigLineNumberTransform.position = new Vector3 (findCornerPoints.current.RD.position.x, topY, 0f);
 				bigAmountText.text = highestRoundNumber.ToString () + "$";
-			
+
 			} else {
 				lines [currentLine].startWidth = 0.3f;
 				lines [currentLine].endWidth = 0.3f;
@@ -659,7 +669,7 @@ public class csvLoaderScript : MonoBehaviour {
 		bottomY = topY;
 		topY = topY + ySeparation;
 
-	
+
 		for (int i = 0; i < 10; i++) {
 			float newYPos = Mathf.Lerp (bottomY, topY, i / 10f);
 			if (newYPos > findCornerPoints.current.RU.position.y) {
@@ -671,6 +681,6 @@ public class csvLoaderScript : MonoBehaviour {
 			currentLine++;
 		}
 		shrinkAllLines ();
-    }
+	}
 
 }
