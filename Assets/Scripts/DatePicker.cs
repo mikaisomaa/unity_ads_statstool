@@ -73,7 +73,7 @@ public class DatePicker : MonoBehaviour {
         }
         return result;
     }
-    void SetupVariables()
+	void SetupVariables(bool hideCalendar = true)
     {
 		string dateText = SelectedDate.ToString(DateFormat);
 		SelectedDateText.text = dateText;
@@ -81,7 +81,7 @@ public class DatePicker : MonoBehaviour {
         CurrentMonth.text = GetMonth(ReferenceDate.Month);
         CurrentYear.text = ReferenceDate.Year.ToString();
         Generate();
-		if (!firstTime) {
+		if (!firstTime && hideCalendar) {
 			gameObject.SetActive (false);
 		} else {
 			firstTime = false;
@@ -130,21 +130,21 @@ public class DatePicker : MonoBehaviour {
         if (!ValidateForwardPickOnly(ReferenceDate.AddYears(1)))
             return;
         ReferenceDate = ReferenceDate.AddYears(1);
-        SetupVariables();
+        SetupVariables(false);
     }
     public void OnYearDec()
     {
         if (!ValidateForwardPickOnly(ReferenceDate.AddYears(-1)))
             return;
         ReferenceDate = ReferenceDate.AddYears(-1);
-        SetupVariables();
+        SetupVariables(false);
     }
     public void OnMonthInc()
     {
         if (!ValidateForwardPickOnly(ReferenceDate.AddMonths(1)))
             return;
         ReferenceDate = ReferenceDate.AddMonths(1);
-        SetupVariables();
+        SetupVariables(false);
 
     }
     public void OnMonthDec()
@@ -152,7 +152,7 @@ public class DatePicker : MonoBehaviour {
         if (!ValidateForwardPickOnly(ReferenceDate.AddMonths(-1)))
             return;
         ReferenceDate = ReferenceDate.AddMonths(-1);
-        SetupVariables();
+        SetupVariables(false);
 
     }
     public void OnDaySelected(DateTime date)
@@ -164,6 +164,7 @@ public class DatePicker : MonoBehaviour {
     public void OnToday()
     {
         ReferenceDate = DateTime.Today;
+		SelectedDate = ReferenceDate;
         SetupVariables();
     }
     public void OnCurrentSelectedDay()
