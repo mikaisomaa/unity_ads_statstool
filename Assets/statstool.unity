@@ -38075,7 +38075,7 @@ MonoBehaviour:
   selectedInputField: {fileID: 0}
   CurrentMonth: {fileID: 1672877783}
   CurrentYear: {fileID: 497619599}
-  DateFormat: dd-MM-yyyy
+  DateFormat: yyyy-MM-dd
   ForwardPickOnly: 0
 --- !u!114 &1885614310
 MonoBehaviour:
